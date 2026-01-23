@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     stages {
-        agent {
-            docker {
-            image 'node:20-alpine'
-        }
-    }
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                }
+            }
             steps {
                 sh '''
                     npm ci
