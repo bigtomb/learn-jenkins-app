@@ -24,8 +24,7 @@ pipeline {
                     npm run build
                 '''
             }
-        }
-        
+        }     
         stage('Tests'){
             parallel{
                 stage('Unit Test'){
@@ -75,6 +74,7 @@ pipeline {
             }
         }
         stage('Deploy Staging') {
+
             agent {
                 docker {
                     image 'node:20-alpine'
@@ -90,6 +90,7 @@ pipeline {
 
                 '''
             }
+        }
         stage('Deploy Prod') {
             agent {
                 docker {
