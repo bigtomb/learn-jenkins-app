@@ -4,6 +4,8 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = '9140a65b-1150-42cf-ab62-d51be0fda44e'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        CI_ENVIRONMENT_URL = 'https://bigtomb-learn-jenkins.netlify.app/'
+
     }
 
     stages {
@@ -24,7 +26,6 @@ pipeline {
             }
         }
         
-
         stage('Tests'){
             parallel{
                 stage('Unit Test'){
@@ -67,7 +68,7 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Local Report', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }    
                 }
@@ -90,5 +91,27 @@ pipeline {
                 '''
             }
         }
+        stage('Prod E2E'){
+                    agent {
+                        docker {
+                            image 'mcr.microsoft.com/playwright:v1.58.0-noble'
+                            reuseNode true
+                        }
+                    }
+                    environment {
+                    CI_ENVIRONMENT_URL = 'https://bigtomb-learn-jenkins.netlify.app'
+                    }
+
+                    steps {
+                        sh '''
+                            npx playwright test --reporter=html
+                        '''
+                    }
+                    post {
+                        always {
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML E2E Report', reportTitles: '', useWrapperFileDirectly: true])
+                        }
+                    }    
+                }
     }
 }
